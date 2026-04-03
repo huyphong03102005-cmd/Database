@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure--jmxde=v3@jymq+d#e-*x*bge6_l%_001vt@afttky2qr80(i2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # cần đổi lại sau khi có domain
 
 
 # Application definition
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,10 +82,10 @@ WSGI_APPLICATION = 'API.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'API',
+        'NAME': 'QuanLyDatVexe',
         'USER': '',  # Để trống nếu dùng Windows Auth hoặc tự điền User
         'PASSWORD': '',  # Tự điền Password
-        'HOST': r'MSI\HUYPHONG',  # Sửa lại định dạng r'...' để tránh lỗi dấu \
+        'HOST': r'THANHNHAN',  # Sửa lại định dạng r'...' để tránh lỗi dấu \
         'PORT': '',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
