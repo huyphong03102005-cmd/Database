@@ -23,7 +23,7 @@ class NhaxeAdmin(admin.ModelAdmin):
 
 @admin.register(User_Authentication)
 class UserAuthAdmin(admin.ModelAdmin):
-    list_display = ('UserID', 'TenDangNhap', 'Vaitro', 'SoDienThoai')
+    list_display = ('UserID', 'TenDangNhap', 'Vaitro', 'SoDienThoai','MatKhau')
     search_fields = ('UserID', 'TenDangNhap', 'SoDienThoai')
 
 @admin.register(Taixe)

@@ -32,8 +32,8 @@ class User_Authentication(models.Model):
     UserID = models.CharField(max_length=10, primary_key=True)
     KhachHang = models.ForeignKey(KhachHang, on_delete=models.SET_NULL, null=True, blank=True)
     Nhaxe = models.ForeignKey(Nhaxe, on_delete=models.SET_NULL, null=True, blank=True)
-    TenDangNhap = models.CharField(max_length=200, unique=True)
-    MatKhau = models.CharField(max_length=200)
+    TenDangNhap = models.CharField(max_length=200, unique=True,null=True,blank=True)
+    MatKhau = models.CharField(max_length=200,null=True,blank=True)
     Vaitro = models.CharField(max_length=20)
     SoDienThoai = models.CharField(
         max_length=12, 
@@ -42,7 +42,7 @@ class User_Authentication(models.Model):
     )
 
     def __str__(self):
-        return self.TenDangNhap
+        return self.UserID
 
 # 4. Bảng Tài Xế
 class Taixe(models.Model):
