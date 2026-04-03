@@ -86,19 +86,10 @@ WSGI_APPLICATION = 'API.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Database configuration for SQL Server
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'QuanLyDatVexe',
-        'USER': '',  # Để trống nếu dùng Windows Auth hoặc tự điền User
-        'PASSWORD': '',  # Tự điền Password
-        'HOST': r'THANHNHAN',  # Sửa lại định dạng r'...' để tránh lỗi dấu \
-        'PORT': '',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'extra_params': 'Trusted_Connection=yes',  # Giữ nguyên nếu dùng Windows Auth
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
