@@ -19,9 +19,9 @@ class Nhaxe(models.Model):
     AnhDaiDienURL = models.CharField(max_length=255, null=True, blank=True)
     DiaChiTruSo = models.TextField(max_length=200, null=True, blank=True)
     SoDienThoai = models.CharField(
-        max_length=12, 
+        max_length=10,
         unique=True,
-        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
+        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")]
     )
 
     def __str__(self):
@@ -32,17 +32,17 @@ class User_Authentication(models.Model):
     UserID = models.CharField(max_length=10, primary_key=True)
     KhachHang = models.ForeignKey(KhachHang, on_delete=models.SET_NULL, null=True, blank=True)
     Nhaxe = models.ForeignKey(Nhaxe, on_delete=models.SET_NULL, null=True, blank=True)
-    TenDangNhap = models.CharField(max_length=200, unique=True,null=True,blank=True)
-    MatKhau = models.CharField(max_length=200,null=True,blank=True)
+    TenDangNhap = models.CharField(max_length=200, unique=True)
+    MatKhau = models.CharField(max_length=200)
     Vaitro = models.CharField(max_length=20)
     SoDienThoai = models.CharField(
-        max_length=12, 
+        max_length=10,
         unique=True,
-        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
+        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")]
     )
 
     def __str__(self):
-        return self.UserID
+        return self.TenDangNhap
 
 # 4. Bảng Tài Xế
 class Taixe(models.Model):
@@ -50,12 +50,12 @@ class Taixe(models.Model):
     HinhAnhURL = models.CharField(max_length=255, null=True, blank=True)
     SoBangLai = models.CharField(max_length=20, unique=True)
     soCCCD = models.CharField(
-        max_length=12, 
+        max_length=12,
         unique=True,
         validators=[RegexValidator(regex=r'^\d{12}$', message="CCCD phải có đúng 12 chữ số")]
     )
     LoaiBangLai = models.CharField(max_length=20, null=True, blank=True)
-    NgayHetHanBangLai = models.DateTimeField(null=True, blank=True)
+    NgayHetHanBangLai = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.TaixeID
@@ -66,8 +66,8 @@ class CHITIETTAIXE(models.Model):
     Taixe = models.ForeignKey(Taixe, on_delete=models.CASCADE)
     HoTen = models.CharField(max_length=200, null=True, blank=True)
     Tennhaxe = models.CharField(max_length=200, null=True, blank=True)
-    NgayBatDau = models.DateTimeField(null=True, blank=True)
-    NgayKetThuc = models.DateTimeField(null=True, blank=True)
+    NgayBatDau = models.DateField(null=False, blank=False)
+    NgayKetThuc = models.DateField(null=False, blank=False)
 
     class Meta:
         unique_together = ('Nhaxe', 'Taixe')
@@ -78,7 +78,7 @@ class Loaixe(models.Model):
     NgayCapNhatGia = models.DateField(null=True, blank=True)
     SoCho = models.IntegerField(validators=[MinValueValidator(1)])
     SoDoGheNgoiURL = models.CharField(max_length=255, null=True, blank=True)
-    GiaVe = models.DecimalField(max_digits=19, decimal_places=4) # Thay cho MONEY
+    GiaVe = models.DecimalField(max_digits=10, decimal_places=0)
 
     def __str__(self):
         return self.LoaixeID
@@ -149,11 +149,11 @@ class Ve(models.Model):
     ChuyenXe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE)
     Ghe = models.ForeignKey(GheNgoi, on_delete=models.CASCADE)
     SoDienThoai = models.CharField(
-        max_length=12,
-        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
+        max_length=10,
+        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")]
     )
     NgayDat = models.DateTimeField(auto_now_add=True)
-    GiaVe = models.DecimalField(max_digits=19, decimal_places=4)
+    GiaVe = models.DecimalField(max_digits=10, decimal_places=0)
     TrangThaiThanhToan = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
