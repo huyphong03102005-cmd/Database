@@ -18,15 +18,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+import os
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--jmxde=v3@jymq+d#e-*x*bge6_l%_001vt@afttky2qr80(i2'
+# Thay đổi dòng SECRET_KEY cũ thành:
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure--jmxde=v3@jymq+d#e-*x*bge6_l%_001vt@afttky2qr80(i2')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Thay đổi dòng DEBUG cũ thành:
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*'] # cần đổi lại sau khi có domain
 
+STATIC_URL = 'static/'
+
+# Thêm dòng này để chỉ định thư mục tập trung file tĩnh
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Cấu hình WhiteNoise để nén và lưu bộ nhớ đệm file tĩnh (tối ưu cho Render)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Application definition
 
@@ -132,7 +140,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
