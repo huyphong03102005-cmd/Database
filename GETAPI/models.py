@@ -6,6 +6,7 @@ class KhachHang(models.Model):
     KhachHangID = models.CharField(max_length=10, primary_key=True)
     Email = models.EmailField(max_length=100, unique=True, null=True, blank=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
+    Ngaysinh=models.DateTimeField(null=True, blank=True)
     AnhDaiDienURL = models.TextField(null=True, blank=True)
     def __str__(self):
         return self.KhachHangID
@@ -15,6 +16,7 @@ class Nhaxe(models.Model):
     Tennhaxe=models.CharField(max_length=200, null=True, blank=True)
     TenNguoiDaiDien = models.CharField(max_length=200, null=True, blank=True)
     Email = models.EmailField(max_length=100, unique=True)
+    Nguoidaidien=models.CharField(max_length=200,null=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
     AnhDaiDienURL = models.TextField(null=True, blank=True)
     DiaChiTruSo = models.TextField(max_length=200, null=True, blank=True)
