@@ -7,6 +7,7 @@ class KhachHang(models.Model):
     Email = models.EmailField(max_length=100, unique=True, null=True, blank=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
     AnhDaiDienURL = models.TextField(null=True, blank=True)
+    Ngaysinh=models.DateTimeField(null=True, blank=True)
     def __str__(self):
         return self.KhachHangID
 
