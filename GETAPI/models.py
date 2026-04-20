@@ -120,7 +120,7 @@ class TuyenXe(models.Model):
     diemDi = models.CharField(max_length=500, default='Đà Nẵng')
     diemDen = models.CharField(max_length=500, default='Huế')
     QuangDuong = models.CharField(max_length=100, null=True, blank=True)
-    ThoiGian = models.TimeField(null=True, blank=True)
+    ThoiGian = models.CharField(max_length=100, null=True, blank=True)
     TrangThai = models.CharField(max_length=50, choices=TRANG_THAI_CHOICES, default='Đang hoạt động')
     DiemTrungGian = models.CharField(max_length=500, null=True, blank=True)
 
