@@ -6,18 +6,19 @@ class KhachHang(models.Model):
     KhachHangID = models.CharField(max_length=10, primary_key=True)
     Email = models.EmailField(max_length=100, unique=True, null=True, blank=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
-    Ngaysinh=models.DateTimeField(null=True, blank=True)
-    Hoten=models.CharField(max_length=500, null=True, blank=True)
     AnhDaiDienURL = models.TextField(null=True, blank=True)
     def __str__(self):
         return self.KhachHangID
+
 # 2. Bảng Nhà Xe
 class Nhaxe(models.Model):
     NhaxeID = models.CharField(max_length=10, primary_key=True)
-    Tennhaxe=models.CharField(max_length=200, null=True, blank=True)
+    Tennhaxe = models.CharField(max_length=200, null=True, blank=True)
+    TenNguoiDaiDien = models.CharField(max_length=200, null=True, blank=True)
     Email = models.EmailField(max_length=100, unique=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
-    AnhDaiDienURL = models.TextField(null=True, blank=True)
+    # Ảnh đại diện cho phép upload từ album
+    AnhDaiDien = models.ImageField(upload_to='nhaxe_avatars/', null=True, blank=True)
     DiaChiTruSo = models.TextField(max_length=200, null=True, blank=True)
     SoDienThoai = models.CharField(
         max_length=12,
@@ -26,7 +27,8 @@ class Nhaxe(models.Model):
     )
 
     def __str__(self):
-        return self.NhaxeID
+        return self.Tennhaxe or self.NhaxeID
+
 # 3. Bảng Tài Khoản (User Authentication)
 class User_Authentication(models.Model):
     UserID = models.CharField(max_length=10, primary_key=True)
@@ -71,6 +73,7 @@ class CHITIETTAIXE(models.Model):
 
     class Meta:
         unique_together = ('Nhaxe', 'Taixe')
+
 # 6. Bảng Loại Xe
 class Loaixe(models.Model):
     LoaixeID = models.CharField(max_length=10, primary_key=True)
@@ -106,13 +109,19 @@ class Xe(models.Model):
 
 # 9. Bảng Tuyến Xe
 class TuyenXe(models.Model):
+    TRANG_THAI_CHOICES = [
+        ('Đang hoạt động', 'Đang hoạt động'),
+        ('Bảo trì', 'Bảo trì'),
+        ('Ngưng hoạt động', 'Ngưng hoạt động'),
+    ]
     tuyenXeID = models.CharField(max_length=10, primary_key=True)
     nhaXe = models.ForeignKey(Nhaxe, on_delete=models.CASCADE)
     tenTuyen = models.CharField(max_length=500, null=True, blank=True)
     diemDi = models.CharField(max_length=500, default='Đà Nẵng')
     diemDen = models.CharField(max_length=500, default='Huế')
     QuangDuong = models.CharField(max_length=100, null=True, blank=True)
-    ThoiGian = models.CharField(max_length=100, null=True, blank=True)
+    ThoiGian = models.TimeField(null=True, blank=True)
+    TrangThai = models.CharField(max_length=50, choices=TRANG_THAI_CHOICES, default='Đang hoạt động')
     DiemTrungGian = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self):
