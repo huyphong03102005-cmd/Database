@@ -10,14 +10,13 @@ class KhachHang(models.Model):
     def __str__(self):
         return self.KhachHangID
 
-# 2. Bảng Nhà Xe
+# 2. Bảng Nhà Xe:
 class Nhaxe(models.Model):
     NhaxeID = models.CharField(max_length=10, primary_key=True)
     Tennhaxe = models.CharField(max_length=200, null=True, blank=True)
     TenNguoiDaiDien = models.CharField(max_length=200, null=True, blank=True)
     Email = models.EmailField(max_length=100, unique=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
-    # Ảnh đại diện cho phép upload từ album
     AnhDaiDien = models.ImageField(upload_to='nhaxe_avatars/', null=True, blank=True)
     DiaChiTruSo = models.TextField(max_length=200, null=True, blank=True)
     SoDienThoai = models.CharField(
@@ -42,7 +41,6 @@ class User_Authentication(models.Model):
         unique=True,
         validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
-
     def __str__(self):
         return self.TenDangNhap
 
@@ -107,7 +105,7 @@ class Xe(models.Model):
     def __str__(self):
         return self.BienSoXe
 
-# 9. Bảng Tuyến Xe
+# 9. Bảng Tuyến Xe:
 class TuyenXe(models.Model):
     TRANG_THAI_CHOICES = [
         ('Đang hoạt động', 'Đang hoạt động'),
