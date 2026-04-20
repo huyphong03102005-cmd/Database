@@ -13,6 +13,7 @@ class KhachHang(models.Model):
 class Nhaxe(models.Model):
     NhaxeID = models.CharField(max_length=10, primary_key=True)
     Tennhaxe=models.CharField(max_length=200, null=True, blank=True)
+    TenNguoiDaiDien = models.CharField(max_length=200, null=True, blank=True)
     Email = models.EmailField(max_length=100, unique=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
     AnhDaiDienURL = models.TextField(null=True, blank=True)
@@ -110,6 +111,7 @@ class TuyenXe(models.Model):
     diemDi = models.CharField(max_length=500, default='Đà Nẵng')
     diemDen = models.CharField(max_length=500, default='Huế')
     QuangDuong = models.CharField(max_length=100, null=True, blank=True)
+    ThoiGian = models.CharField(max_length=100, null=True, blank=True)
     DiemTrungGian = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self):
