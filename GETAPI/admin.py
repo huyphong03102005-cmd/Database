@@ -18,8 +18,8 @@ class KhachHangAdmin(admin.ModelAdmin):
 
 @admin.register(Nhaxe)
 class NhaxeAdmin(admin.ModelAdmin):
-    list_display = ('NhaxeID', 'Email', 'SoDienThoai', 'NgayDangKy')
-    search_fields = ('NhaxeID', 'Email', 'SoDienThoai')
+    list_display = ('NhaxeID', 'Tennhaxe', 'TenNguoiDaiDien', 'Email', 'SoDienThoai', 'NgayDangKy')
+    search_fields = ('NhaxeID', 'Tennhaxe', 'TenNguoiDaiDien', 'Email', 'SoDienThoai')
 
 @admin.register(User_Authentication)
 class UserAuthAdmin(admin.ModelAdmin):
@@ -50,7 +50,8 @@ class XeAdmin(admin.ModelAdmin):
 
 @admin.register(TuyenXe)
 class TuyenXeAdmin(admin.ModelAdmin):
-    list_display = ('tuyenXeID', 'tenTuyen', 'nhaXe', 'diemDi', 'diemDen')
+    list_display = ('tuyenXeID', 'tenTuyen', 'nhaXe', 'diemDi', 'diemDen', 'QuangDuong', 'ThoiGian')
+    search_fields = ('tuyenXeID', 'tenTuyen', 'diemDi', 'diemDen')
 
 @admin.register(ChuyenXe)
 class ChuyenXeAdmin(admin.ModelAdmin):
