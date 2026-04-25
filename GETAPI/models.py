@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator, RegexVa
 
 # 1. Bảng Khách Hàng
 class KhachHang(models.Model):
+    Hovaten = models.CharField(max_length=900, null=True, blank=True)
     KhachHangID = models.CharField(max_length=10, primary_key=True)
     Email = models.EmailField(max_length=100, unique=True, null=True, blank=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
