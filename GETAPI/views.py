@@ -1,4 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from .models import (
     KhachHang, Nhaxe, User_Authentication, Taixe, CHITIETTAIXE, 
     Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, ThanhToan, DanhGia
@@ -8,8 +10,30 @@ from .serializers import (
     TaixeSerializer, ChiTietTaiXeSerializer, LoaixeSerializer, 
     ChiTietLoaiXeSerializer, XeSerializer, TuyenXeSerializer, 
     ChuyenXeSerializer, GheNgoiSerializer, VeSerializer, 
-    ThanhToanSerializer, DanhGiaSerializer
+    ThanhToanSerializer, DanhGiaSerializer, DatVeSerializer
 )
+
+class DatVeAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = DatVeSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                # Tạo vé thông qua hàm create trong Serializer
+                danh_sach_ve = serializer.save()
+                
+                # Format kết quả
+                ve_serializer = VeSerializer(danh_sach_ve, many=True)
+                return Response({
+                    "message": "Đặt vé thành công.",
+                    "data": ve_serializer.data
+                }, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                # Nếu có lỗi khi lưu (ở block transaction.atomic)
+                return Response({
+                    "error": str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class KhachHangViewSet(viewsets.ModelViewSet):
     queryset = KhachHang.objects.all()
