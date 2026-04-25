@@ -51,19 +51,44 @@ class TuyenXeSerializer(serializers.ModelSerializer):
 
 # Trong serializers.py của project Django
 class ChuyenXeSerializer(serializers.ModelSerializer):
-    # Lấy tên từ các bảng liên quan (Related Fields)
-    TenNhaXe = serializers.CharField(source='TuyenXe.nhaXe.tenNhaXe', read_only=True)
-    GiaVe = serializers.CharField(source='Xe.Loaixe.giaVe', read_only=True)
-    LoaiXe = serializers.CharField(source='Xe.Loaixe.tenLoai', read_only=True)
-    TenTuyen = serializers.CharField(source='TuyenXe.tenTuyen', read_only=True)
-    # tính số chỗ trống bằng tổng chỗ - vé đã đặt
-    SoChoTrong = serializers.IntegerField(default=10, read_only=True)
+
+    TenNhaXe = serializers.CharField(
+        source='TuyenXe.nhaXe.Tennhaxe',
+        read_only=True
+    )
+
+    TenTuyen = serializers.CharField(
+        source='TuyenXe.tenTuyen',
+        read_only=True
+    )
+
+    GiaVe = serializers.SerializerMethodField()
+    LoaiXe = serializers.SerializerMethodField()
+    SoChoTrong = serializers.SerializerMethodField()
 
     class Meta:
         model = ChuyenXe
-        # Đảm bảo các tên trường ở đây KHỚP với @SerializedName trong Android
-        fields = ['ChuyenXeID', 'NgayKhoiHanh', 'GioDi', 'GioDen',
-                  'TenNhaXe', 'GiaVe', 'LoaiXe', 'TenTuyen', 'SoChoTrong']
+        fields = [
+            'ChuyenXeID', 'Xe', 'TuyenXe', 'Taixe',
+            'NgayKhoiHanh', 'GioDi', 'GioDen', 'TrangThai',
+            'TenNhaXe', 'GiaVe', 'LoaiXe', 'TenTuyen', 'SoChoTrong'
+        ]
+
+    def get_GiaVe(self, obj):
+        if obj.Xe and obj.Xe.Loaixe:
+            return obj.Xe.Loaixe.GiaVe
+        return None
+
+    def get_LoaiXe(self, obj):
+        if obj.Xe and obj.Xe.Loaixe:
+            return obj.Xe.Loaixe.LoaixeID
+        return None
+
+    def get_SoChoTrong(self, obj):
+        if obj.Xe and obj.Xe.SoGhe:
+            ve_da_dat = Ve.objects.filter(ChuyenXe=obj).count()
+            return obj.Xe.SoGhe - ve_da_dat
+        return 0
 
 class GheNgoiSerializer(serializers.ModelSerializer):
     class Meta:
