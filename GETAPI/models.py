@@ -3,12 +3,30 @@ from django.core.validators import MinValueValidator, MaxValueValidator, RegexVa
 
 # 1. Bảng Khách Hàng
 class KhachHang(models.Model):
+    KhachHangID = models.CharField(max_length=10, primary_key=True, blank=True) # Để blank=True cho phép tự sinh
     Hovaten = models.CharField(max_length=900, null=True, blank=True)
-    KhachHangID = models.CharField(max_length=10, primary_key=True)
     Email = models.EmailField(max_length=100, unique=True, null=True, blank=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
-    AnhDaiDienURL = models.TextField(null=True, blank=True)
-    Ngaysinh=models.DateField(null=True, blank=True)
+    AnhDaiDienURL = models.ImageField(upload_to='khachhang_avatars/', null=True, blank=True)
+    Ngaysinh = models.DateField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.KhachHangID:
+            # Tạo tự động KhachHangID với cú pháp KH00001, KH00002...
+            last_kh = KhachHang.objects.all().order_by('KhachHangID').last()
+            if not last_kh:
+                self.KhachHangID = 'KH00001'
+            else:
+                last_id = last_kh.KhachHangID
+                try:
+                    last_num = int(last_id[2:]) # Lấy phần số sau chữ 'KH'
+                    new_num = last_num + 1
+                    self.KhachHangID = f'KH{new_num:05d}'
+                except ValueError:
+                    # Fallback nếu vì lý do nào đó ID cũ không đúng format
+                    self.KhachHangID = 'KH00001'
+        super(KhachHang, self).save(*args, **kwargs)
+
     def __str__(self):
         return self.KhachHangID
 
@@ -143,16 +161,32 @@ class ChuyenXe(models.Model):
 
 # 11. Bảng Ghế Ngồi
 class GheNgoi(models.Model):
+    TRANG_THAI_GHE_CHOICES = [
+        ('Còn trống', 'Còn trống'),
+        ('Đang chọn', 'Đang chọn'),
+        ('Đã đặt', 'Đã đặt'),
+    ]
     gheID = models.CharField(max_length=10, primary_key=True)
     ChuyenXe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE)
     soGhe = models.CharField(max_length=5, null=True, blank=True)
-    trangThai = models.CharField(max_length=20, null=True, blank=True)
+    trangThai = models.CharField(max_length=20, choices=TRANG_THAI_GHE_CHOICES, default='Còn trống')
+    # Thêm khoá vé cho ghế, theo yêu cầu "gán mã vé vừa tạo vào ghế đó"
+    Ve = models.ForeignKey('Ve', on_delete=models.SET_NULL, null=True, blank=True, related_name='ghe_ngoi_ve')
 
     def __str__(self):
         return f"{self.soGhe} - {self.ChuyenXe.ChuyenXeID}"
 
 # 12. Bảng Vé
 class Ve(models.Model):
+    TRANG_THAI_DANH_GIA_CHOICES = [
+        ('Không có quyền', 'Không có quyền'),
+        ('Chờ đánh giá', 'Chờ đánh giá'),
+        ('Đã đánh giá', 'Đã đánh giá'),
+    ]
+    TRANG_THAI_THANH_TOAN_CHOICES = [
+        ('Chưa thanh toán', 'Chưa thanh toán'),
+        ('Đã thanh toán', 'Đã thanh toán'),
+    ]
     VeID = models.CharField(max_length=10, primary_key=True)
     KhachHang = models.ForeignKey(KhachHang, on_delete=models.CASCADE)
     ChuyenXe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE)
@@ -163,7 +197,10 @@ class Ve(models.Model):
     )
     NgayDat = models.DateTimeField(auto_now_add=True)
     GiaVe = models.DecimalField(max_digits=19, decimal_places=4)
-    TrangThaiThanhToan = models.CharField(max_length=20, null=True, blank=True)
+    TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES, default='Chưa thanh toán')
+    TrangThaiDanhGia = models.CharField(max_length=50, choices=TRANG_THAI_DANH_GIA_CHOICES, default='Không có quyền')
+    DiemDon = models.CharField(max_length=500, null=True, blank=True)
+    DiemTra = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self):
         return self.VeID
