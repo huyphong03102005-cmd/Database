@@ -18,7 +18,7 @@ class Nhaxe(models.Model):
     TenNguoiDaiDien = models.CharField(max_length=200, null=True, blank=True)
     Email = models.EmailField(max_length=100, unique=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
-    AnhDaiDien = models.ImageField(upload_to='nhaxe_avatars/', null=True, blank=True)
+    AnhDaiDien = models.TextField(null=True, blank=True)
     DiaChiTruSo = models.TextField(max_length=200, null=True, blank=True)
     SoDienThoai = models.CharField(
         max_length=12,
