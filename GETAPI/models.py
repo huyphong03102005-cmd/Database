@@ -132,7 +132,7 @@ class ChuyenXe(models.Model):
     ChuyenXeID = models.CharField(max_length=10, primary_key=True)
     Xe = models.ForeignKey(Xe, on_delete=models.SET_NULL, null=True, blank=True)
     TuyenXe = models.ForeignKey(TuyenXe, on_delete=models.CASCADE)
-    Taixe = models.ForeignKey(Taixe, on_delete=models.CASCADE)
+    Taixe = models.ForeignKey(Taixe, on_delete=models.CASCADE, null=True, blank=True)
     NgayKhoiHanh = models.DateField(null=True, blank=True)
     GioDi = models.TimeField(null=True, blank=True)
     GioDen = models.TimeField(null=True, blank=True)
