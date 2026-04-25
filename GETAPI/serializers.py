@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (
-    KhachHang, Nhaxe, User_Authentication, Taixe, CHITIETTAIXE, 
+    KhachHang, CHITIETKHACHHANG, Nhaxe, User_Authentication, Taixe, CHITIETTAIXE, 
     Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, ThanhToan, DanhGia
 )
 from django.db import transaction
@@ -8,6 +8,23 @@ from django.db import transaction
 class KhachHangSerializer(serializers.ModelSerializer):
     class Meta:
         model = KhachHang
+        fields = '__all__'
+        
+    def create(self, validated_data):
+        # Tự động sinh KhachHangID theo cú pháp KH00001
+        total_kh = KhachHang.objects.count()
+        kh_id = f"KH{total_kh + 1:05d}"
+        
+        while KhachHang.objects.filter(KhachHangID=kh_id).exists():
+            total_kh += 1
+            kh_id = f"KH{total_kh + 1:05d}"
+            
+        validated_data['KhachHangID'] = kh_id
+        return super().create(validated_data)
+
+class ChiTietKhachHangSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CHITIETKHACHHANG
         fields = '__all__'
 
 class NhaxeSerializer(serializers.ModelSerializer):
@@ -44,6 +61,22 @@ class XeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Xe
         fields = '__all__'
+        
+    def create(self, validated_data):
+        # Tự động lấy SoGhe từ Loaixe nếu chưa có
+        if 'SoGhe' not in validated_data and 'Loaixe' in validated_data:
+            validated_data['SoGhe'] = validated_data['Loaixe'].SoCho
+            
+        # Tự động sinh XeID theo cú pháp XE00001
+        total_xe = Xe.objects.count()
+        xe_id = f"XE{total_xe + 1:05d}"
+        
+        while Xe.objects.filter(XeID=xe_id).exists():
+            total_xe += 1
+            xe_id = f"XE{total_xe + 1:05d}"
+            
+        validated_data['XeID'] = xe_id
+        return super().create(validated_data)
 
 class TuyenXeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -69,9 +102,27 @@ class ChuyenXeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChuyenXe
-        # Đảm bảo các tên trường ở đây KHỚP với @SerializedName trong Android
-        fields = ['ChuyenXeID', 'NgayKhoiHanh', 'GioDi', 'GioDen',
-                  'TenNhaXe', 'GiaVe', 'LoaiXe', 'TenTuyen', 'SoChoTrong']
+        fields = [
+            'ChuyenXeID', 'Xe', 'TuyenXe', 'Taixe',
+            'NgayKhoiHanh', 'GioDi', 'GioDen', 'TrangThai',
+            'TenNhaXe', 'GiaVe', 'LoaiXe', 'TenTuyen', 'SoChoTrong'
+        ]
+
+    def get_GiaVe(self, obj):
+        if obj.Xe and obj.Xe.Loaixe:
+            return obj.Xe.Loaixe.GiaVe
+        return None
+
+    def get_LoaiXe(self, obj):
+        if obj.Xe and obj.Xe.Loaixe:
+            return obj.Xe.Loaixe.LoaixeID
+        return None
+
+    def get_SoChoTrong(self, obj):
+        if obj.Xe and obj.Xe.SoGhe:
+            ve_da_dat = Ve.objects.filter(ChuyenXe=obj).count()
+            return obj.Xe.SoGhe - ve_da_dat
+        return 0
 
 class GheNgoiSerializer(serializers.ModelSerializer):
     class Meta:
