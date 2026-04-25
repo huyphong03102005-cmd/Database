@@ -153,6 +153,15 @@ class GheNgoi(models.Model):
 
 # 12. Bảng Vé
 class Ve(models.Model):
+    TRANG_THAI_DANH_GIA_CHOICES = [
+        ('Không có quyền', 'Không có quyền'),
+        ('Chờ đánh giá', 'Chờ đánh giá'),
+        ('Đã đánh giá', 'Đã đánh giá'),
+    ]
+    TRANG_THAI_THANH_TOAN_CHOICES = [
+        ('Chưa thanh toán', 'Chưa thanh toán'),
+        ('Đã thanh toán', 'Đã thanh toán'),
+    ]
     VeID = models.CharField(max_length=10, primary_key=True)
     KhachHang = models.ForeignKey(KhachHang, on_delete=models.CASCADE)
     ChuyenXe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE)
@@ -163,7 +172,8 @@ class Ve(models.Model):
     )
     NgayDat = models.DateTimeField(auto_now_add=True)
     GiaVe = models.DecimalField(max_digits=19, decimal_places=4)
-    TrangThaiThanhToan = models.CharField(max_length=20, null=True, blank=True)
+    TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES, default='Chưa thanh toán')
+    TrangThaiDanhGia = models.CharField(max_length=50, choices=TRANG_THAI_DANH_GIA_CHOICES, default='Không có quyền')
 
     def __str__(self):
         return self.VeID
