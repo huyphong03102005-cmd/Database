@@ -49,10 +49,21 @@ class TuyenXeSerializer(serializers.ModelSerializer):
         model = TuyenXe
         fields = '__all__'
 
+# Trong serializers.py của project Django
 class ChuyenXeSerializer(serializers.ModelSerializer):
+    # Lấy tên từ các bảng liên quan (Related Fields)
+    TenNhaXe = serializers.CharField(source='TuyenXe.nhaXe.tenNhaXe', read_only=True)
+    GiaVe = serializers.CharField(source='Xe.Loaixe.giaVe', read_only=True)
+    LoaiXe = serializers.CharField(source='Xe.Loaixe.tenLoai', read_only=True)
+    TenTuyen = serializers.CharField(source='TuyenXe.tenTuyen', read_only=True)
+    # Giả sử bạn tính số chỗ trống bằng tổng chỗ - vé đã đặt
+    SoChoTrong = serializers.IntegerField(default=10, read_only=True)
+
     class Meta:
         model = ChuyenXe
-        fields = '__all__'
+        # Đảm bảo các tên trường ở đây KHỚP với @SerializedName trong Android
+        fields = ['ChuyenXeID', 'NgayKhoiHanh', 'GioDi', 'GioDen',
+                  'TenNhaXe', 'GiaVe', 'LoaiXe', 'TenTuyen', 'SoChoTrong']
 
 class GheNgoiSerializer(serializers.ModelSerializer):
     class Meta:
