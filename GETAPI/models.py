@@ -3,44 +3,46 @@ from django.core.validators import MinValueValidator, MaxValueValidator, RegexVa
 
 # 1. Bảng Khách Hàng
 class KhachHang(models.Model):
+    Hovaten = models.CharField(max_length=900, null=True, blank=True)
     KhachHangID = models.CharField(max_length=10, primary_key=True)
     Email = models.EmailField(max_length=100, unique=True, null=True, blank=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
-    AnhDaiDienURL = models.CharField(max_length=255, null=True, blank=True)
-
+    AnhDaiDienURL = models.TextField(null=True, blank=True)
+    Ngaysinh=models.DateField(null=True, blank=True)
     def __str__(self):
         return self.KhachHangID
 
-# 2. Bảng Nhà Xe
+# 2. Bảng Nhà Xe:
 class Nhaxe(models.Model):
     NhaxeID = models.CharField(max_length=10, primary_key=True)
+    Tennhaxe = models.CharField(max_length=200, null=True, blank=True)
+    TenNguoiDaiDien = models.CharField(max_length=200, null=True, blank=True)
     Email = models.EmailField(max_length=100, unique=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
-    AnhDaiDienURL = models.CharField(max_length=255, null=True, blank=True)
+    AnhDaiDien = models.TextField(null=True, blank=True)
     DiaChiTruSo = models.TextField(max_length=200, null=True, blank=True)
     SoDienThoai = models.CharField(
-        max_length=10,
+        max_length=12,
         unique=True,
-        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")]
+        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
 
     def __str__(self):
-        return self.NhaxeID
+        return self.Tennhaxe or self.NhaxeID
 
 # 3. Bảng Tài Khoản (User Authentication)
 class User_Authentication(models.Model):
     UserID = models.CharField(max_length=10, primary_key=True)
     KhachHang = models.ForeignKey(KhachHang, on_delete=models.SET_NULL, null=True, blank=True)
     Nhaxe = models.ForeignKey(Nhaxe, on_delete=models.SET_NULL, null=True, blank=True)
-    TenDangNhap = models.CharField(max_length=200, unique=True)
-    MatKhau = models.CharField(max_length=200)
+    TenDangNhap = models.CharField(max_length=200, unique=True,null=True,blank=True)
+    MatKhau = models.CharField(max_length=200,null=True,blank=True)
     Vaitro = models.CharField(max_length=20)
     SoDienThoai = models.CharField(
-        max_length=10,
+        max_length=12,
         unique=True,
-        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")]
+        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
-
     def __str__(self):
         return self.TenDangNhap
 
@@ -55,7 +57,7 @@ class Taixe(models.Model):
         validators=[RegexValidator(regex=r'^\d{12}$', message="CCCD phải có đúng 12 chữ số")]
     )
     LoaiBangLai = models.CharField(max_length=20, null=True, blank=True)
-    NgayHetHanBangLai = models.DateField(null=True, blank=True)
+    NgayHetHanBangLai = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.TaixeID
@@ -66,8 +68,8 @@ class CHITIETTAIXE(models.Model):
     Taixe = models.ForeignKey(Taixe, on_delete=models.CASCADE)
     HoTen = models.CharField(max_length=200, null=True, blank=True)
     Tennhaxe = models.CharField(max_length=200, null=True, blank=True)
-    NgayBatDau = models.DateField(null=False, blank=False)
-    NgayKetThuc = models.DateField(null=False, blank=False)
+    NgayBatDau = models.DateTimeField(null=True, blank=True)
+    NgayKetThuc = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ('Nhaxe', 'Taixe')
@@ -78,7 +80,7 @@ class Loaixe(models.Model):
     NgayCapNhatGia = models.DateField(null=True, blank=True)
     SoCho = models.IntegerField(validators=[MinValueValidator(1)])
     SoDoGheNgoiURL = models.CharField(max_length=255, null=True, blank=True)
-    GiaVe = models.DecimalField(max_digits=10, decimal_places=0)
+    GiaVe = models.DecimalField(max_digits=19, decimal_places=4) # Thay cho MONEY
 
     def __str__(self):
         return self.LoaixeID
@@ -105,14 +107,21 @@ class Xe(models.Model):
     def __str__(self):
         return self.BienSoXe
 
-# 9. Bảng Tuyến Xe
+# 9. Bảng Tuyến Xe:
 class TuyenXe(models.Model):
+    TRANG_THAI_CHOICES = [
+        ('Đang hoạt động', 'Đang hoạt động'),
+        ('Bảo trì', 'Bảo trì'),
+        ('Ngưng hoạt động', 'Ngưng hoạt động'),
+    ]
     tuyenXeID = models.CharField(max_length=10, primary_key=True)
     nhaXe = models.ForeignKey(Nhaxe, on_delete=models.CASCADE)
     tenTuyen = models.CharField(max_length=500, null=True, blank=True)
     diemDi = models.CharField(max_length=500, default='Đà Nẵng')
     diemDen = models.CharField(max_length=500, default='Huế')
     QuangDuong = models.CharField(max_length=100, null=True, blank=True)
+    ThoiGian = models.CharField(max_length=100, null=True, blank=True)
+    TrangThai = models.CharField(max_length=50, choices=TRANG_THAI_CHOICES, default='Đang hoạt động')
     DiemTrungGian = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self):
@@ -149,11 +158,11 @@ class Ve(models.Model):
     ChuyenXe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE)
     Ghe = models.ForeignKey(GheNgoi, on_delete=models.CASCADE)
     SoDienThoai = models.CharField(
-        max_length=10,
-        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số")]
+        max_length=12,
+        validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
     NgayDat = models.DateTimeField(auto_now_add=True)
-    GiaVe = models.DecimalField(max_digits=10, decimal_places=0)
+    GiaVe = models.DecimalField(max_digits=19, decimal_places=4)
     TrangThaiThanhToan = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
@@ -179,6 +188,5 @@ class DanhGia(models.Model):
     Diemso = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     Nhanxet = models.TextField(max_length=500, null=True, blank=True)
     NgayDanhGia = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
         return f"Review {self.DanhGiaID} - {self.Diemso}"
