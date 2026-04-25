@@ -26,5 +26,5 @@ router.register(r'danhgia', DanhGiaViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('api/dat-ve/', DatVeAPIView.as_view(), name='dat_ve_api'),
+    path('dat-ve/', DatVeAPIView.as_view(), name='dat_ve_api'),
 ]

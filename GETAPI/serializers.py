@@ -53,18 +53,40 @@ class TuyenXeSerializer(serializers.ModelSerializer):
 # Trong serializers.py của project Django
 class ChuyenXeSerializer(serializers.ModelSerializer):
     # Lấy tên từ các bảng liên quan (Related Fields)
-    TenNhaXe = serializers.CharField(source='TuyenXe.nhaXe.tenNhaXe', read_only=True)
-    GiaVe = serializers.CharField(source='Xe.Loaixe.giaVe', read_only=True)
-    LoaiXe = serializers.CharField(source='Xe.Loaixe.tenLoai', read_only=True)
+    TenNhaXe = serializers.CharField(source='TuyenXe.nhaXe.Tennhaxe', read_only=True)
     TenTuyen = serializers.CharField(source='TuyenXe.tenTuyen', read_only=True)
-    # tính số chỗ trống bằng tổng chỗ - vé đã đặt
-    SoChoTrong = serializers.IntegerField(default=10, read_only=True)
+    
+    # Sử dụng SerializerMethodField để xử lý an toàn trường hợp Xe là NULL
+    GiaVe = serializers.SerializerMethodField()
+    LoaiXe = serializers.SerializerMethodField()
+    SoChoTrong = serializers.SerializerMethodField()
 
     class Meta:
         model = ChuyenXe
         # Đảm bảo các tên trường ở đây KHỚP với @SerializedName trong Android
         fields = ['ChuyenXeID', 'NgayKhoiHanh', 'GioDi', 'GioDen',
                   'TenNhaXe', 'GiaVe', 'LoaiXe', 'TenTuyen', 'SoChoTrong']
+    
+    def get_GiaVe(self, obj):
+        if obj.Xe and getattr(obj.Xe, 'loaiXeID', None):
+            return obj.Xe.loaiXeID.GiaVe
+        elif obj.Xe and getattr(obj.Xe, 'Loaixe', None):
+            return obj.Xe.Loaixe.GiaVe
+        return None # Trả về null nếu không có Xe hoặc Loaixe
+
+    def get_LoaiXe(self, obj):
+        if obj.Xe and getattr(obj.Xe, 'loaiXeID', None):
+            return obj.Xe.loaiXeID.LoaixeID
+        elif obj.Xe and getattr(obj.Xe, 'Loaixe', None):
+             return obj.Xe.Loaixe.LoaixeID
+        return None # Trả về null nếu không có Xe hoặc Loaixe
+
+    def get_SoChoTrong(self, obj):
+        so_ghe = getattr(obj.Xe, 'soGhe', None) or getattr(obj.Xe, 'SoGhe', None)
+        if obj.Xe and so_ghe:
+            ve_da_dat = Ve.objects.filter(ChuyenXe=obj).count()
+            return so_ghe - ve_da_dat
+        return 0 # Trả về 0 nếu không có thông tin về xe
 
 class GheNgoiSerializer(serializers.ModelSerializer):
     class Meta:
@@ -120,7 +142,7 @@ class DatVeSerializer(serializers.Serializer):
         for so_ghe in danh_sach_ghe:
             try:
                 ghe = GheNgoi.objects.get(ChuyenXe=chuyen_xe, soGhe=so_ghe)
-                if ghe.trangThai == 'Đã bán':
+                if ghe.trangThai == 'Đã đặt':
                     raise serializers.ValidationError(f"Ghế {so_ghe} đã có người đặt.")
                 ghe_objs.append(ghe)
             except GheNgoi.DoesNotExist:
@@ -166,7 +188,7 @@ class DatVeSerializer(serializers.Serializer):
                 )
                 
                 # Cập nhật trạng thái ghế
-                ghe.trangThai = 'Đã bán'
+                ghe.trangThai = 'Đã đặt'
                 ghe.Ve = ve
                 ghe.save()
                 
