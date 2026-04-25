@@ -147,6 +147,8 @@ class GheNgoi(models.Model):
     ChuyenXe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE)
     soGhe = models.CharField(max_length=5, null=True, blank=True)
     trangThai = models.CharField(max_length=20, null=True, blank=True)
+    # Thêm khoá vé cho ghế, theo yêu cầu "gán mã vé vừa tạo vào ghế đó"
+    Ve = models.ForeignKey('Ve', on_delete=models.SET_NULL, null=True, blank=True, related_name='ghe_ngoi_ve')
 
     def __str__(self):
         return f"{self.soGhe} - {self.ChuyenXe.ChuyenXeID}"
@@ -174,6 +176,9 @@ class Ve(models.Model):
     GiaVe = models.DecimalField(max_digits=19, decimal_places=4)
     TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES, default='Chưa thanh toán')
     TrangThaiDanhGia = models.CharField(max_length=50, choices=TRANG_THAI_DANH_GIA_CHOICES, default='Không có quyền')
+    TrangThai = models.CharField(max_length=50, default='Hiện tại')
+    DiemDon = models.CharField(max_length=500, null=True, blank=True)
+    DiemTra = models.CharField(max_length=500, null=True, blank=True)
 
     def __str__(self):
         return self.VeID
