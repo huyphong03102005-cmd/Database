@@ -56,7 +56,7 @@ class ChuyenXeSerializer(serializers.ModelSerializer):
     GiaVe = serializers.CharField(source='Xe.Loaixe.giaVe', read_only=True)
     LoaiXe = serializers.CharField(source='Xe.Loaixe.tenLoai', read_only=True)
     TenTuyen = serializers.CharField(source='TuyenXe.tenTuyen', read_only=True)
-    # Giả sử bạn tính số chỗ trống bằng tổng chỗ - vé đã đặt
+    # tính số chỗ trống bằng tổng chỗ - vé đã đặt
     SoChoTrong = serializers.IntegerField(default=10, read_only=True)
 
     class Meta:
