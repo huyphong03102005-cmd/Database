@@ -104,10 +104,8 @@ class DatVeSerializer(serializers.Serializer):
         except ChuyenXe.DoesNotExist:
             raise serializers.ValidationError("Chuyến xe không tồn tại.")
         
-        # 2. Kiểm tra khách hàng tồn tại qua SDT trong User_Authentication (hoặc KhachHang)
-        # Theo yêu cầu "KhachHang qua số điện thoại" và "Model User_authentication có trường SODIENTHOAI"
+        # 2. Kiểm tra khách hàng tồn tại qua SDT trong User_Authentication
         try:
-            # Tìm khách hàng có số điện thoại tương ứng
             user_auth = User_Authentication.objects.get(SoDienThoai=attrs['khach_hang'])
             if not user_auth.KhachHang:
                 raise serializers.ValidationError("Tài khoản này chưa có thông tin Khách Hàng.")
@@ -137,7 +135,6 @@ class DatVeSerializer(serializers.Serializer):
         ghe_objs = validated_data['ghe_objs']
         diem_don = validated_data.get('diem_don', '')
         diem_tra = validated_data.get('diem_tra', '')
-        # Tính giá mỗi vé dựa trên tổng tiền chia đều cho số ghế, hoặc lấy từ ChuyenXe
         gia_ve = validated_data['tong_tien'] / len(ghe_objs)
         so_dien_thoai = validated_data['so_dien_thoai']
         
@@ -145,9 +142,13 @@ class DatVeSerializer(serializers.Serializer):
         
         with transaction.atomic():
             for ghe in ghe_objs:
-                # Tạo VeID, logic tự sinh ID có thể tùy chỉnh, ở đây ta dùng uuid hoặc max id
-                import uuid
-                ve_id = f"V{str(uuid.uuid4().int)[:8]}" 
+                # Tự động tạo VeID: lấy số lượng vé hiện có + 1
+                total_ve = Ve.objects.count()
+                ve_id = f"VE{total_ve + 1:04d}" # VD: VE0001, VE0002...
+                # Đảm bảo VeID là duy nhất trong trường hợp request đồng thời
+                while Ve.objects.filter(VeID=ve_id).exists():
+                    total_ve += 1
+                    ve_id = f"VE{total_ve + 1:04d}"
                 
                 # Tạo vé mới
                 ve = Ve.objects.create(
