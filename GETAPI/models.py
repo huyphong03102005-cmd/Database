@@ -32,7 +32,7 @@ class KhachHang(models.Model):
         super(KhachHang, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.KhachHangID
+        return str(self.KhachHangID) if self.KhachHangID else "Chưa có ID"
 
 # 2. Bảng Nhà Xe:
 class Nhaxe(models.Model):
@@ -54,7 +54,7 @@ class Nhaxe(models.Model):
         verbose_name_plural = 'Danh sách Nhà xe'
 
     def __str__(self):
-        return self.Tennhaxe or self.NhaxeID
+        return str(self.Tennhaxe) if self.Tennhaxe else str(self.NhaxeID)
 
 # 3. Bảng Tài Khoản (User Authentication)
 class User_Authentication(models.Model):
@@ -76,7 +76,7 @@ class User_Authentication(models.Model):
         verbose_name_plural = 'Danh sách Tài khoản User'
 
     def __str__(self):
-        return self.TenDangNhap
+        return str(self.TenDangNhap) if self.TenDangNhap else str(self.UserID)
 
 # 4. Bảng Tài Xế
 class Taixe(models.Model):
@@ -96,7 +96,7 @@ class Taixe(models.Model):
         verbose_name_plural = 'Danh sách Tài xế'
 
     def __str__(self):
-        return self.TaixeID
+        return str(self.TaixeID)
 
 # 5. Bảng Chi Tiết Tài Xế (Trung gian Nhà xe - Tài xế)
 class CHITIETTAIXE(models.Model):
@@ -112,6 +112,9 @@ class CHITIETTAIXE(models.Model):
         verbose_name = 'Chi tiết Tài xế'
         verbose_name_plural = 'Danh sách Chi tiết Tài xế'
 
+    def __str__(self):
+        return f"{self.Nhaxe} - {self.Taixe}"
+
 # 6. Bảng Loại Xe
 class Loaixe(models.Model):
     LoaixeID = models.CharField(max_length=10, primary_key=True)
@@ -125,7 +128,7 @@ class Loaixe(models.Model):
         verbose_name_plural = 'Danh sách Loại xe'
 
     def __str__(self):
-        return self.LoaixeID
+        return str(self.LoaixeID)
 
 # 7. Bảng Chi Tiết Loại Xe (Trung gian Nhà xe - Loại xe)
 class CHITIETLOAIXE(models.Model):
@@ -138,6 +141,9 @@ class CHITIETLOAIXE(models.Model):
         unique_together = ('Nhaxe', 'Loaixe')
         verbose_name = 'Chi tiết Loại xe'
         verbose_name_plural = 'Danh sách Chi tiết Loại xe'
+
+    def __str__(self):
+        return f"{self.Nhaxe} - {self.Loaixe}"
 
 # 8. Bảng Xe
 class Xe(models.Model):
@@ -153,7 +159,7 @@ class Xe(models.Model):
         verbose_name_plural = 'Danh sách Xe'
 
     def __str__(self):
-        return self.BienSoXe
+        return str(self.BienSoXe) if self.BienSoXe else str(self.XeID)
 
 # 9. Bảng Tuyến Xe:
 class TuyenXe(models.Model):
@@ -177,7 +183,7 @@ class TuyenXe(models.Model):
         verbose_name_plural = 'Danh sách Tuyến xe'
 
     def __str__(self):
-        return self.tenTuyen or self.tuyenXeID
+        return str(self.tenTuyen) if self.tenTuyen else str(self.tuyenXeID)
 
 # 10. Bảng Chuyến Xe
 class ChuyenXe(models.Model):
@@ -195,7 +201,7 @@ class ChuyenXe(models.Model):
         verbose_name_plural = 'Danh sách Chuyến xe'
 
     def __str__(self):
-        return self.ChuyenXeID
+        return str(self.ChuyenXeID)
 
 # 11. Bảng Ghế Ngồi
 class GheNgoi(models.Model):
@@ -249,7 +255,7 @@ class Ve(models.Model):
         verbose_name_plural = 'Danh sách Vé'
 
     def __str__(self):
-        return self.VeID
+        return str(self.VeID)
 
 # 13. Bảng Thanh Toán
 class ThanhToan(models.Model):
@@ -265,7 +271,7 @@ class ThanhToan(models.Model):
         verbose_name_plural = 'Danh sách Thanh toán'
 
     def __str__(self):
-        return self.ThanhToanID
+        return str(self.ThanhToanID)
 
 # 14. Bảng Đánh Giá
 class DanhGia(models.Model):
