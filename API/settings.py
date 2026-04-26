@@ -89,8 +89,9 @@ WSGI_APPLICATION = 'API.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         # Dán link bạn vừa copy từ Render vào đây
-        default='postgresql://vexe_db_user:WFHQHPd8IhIQWWy1rn2dQhk6rojvuEae@dpg-d77uem6dqaus73amrv20-a.ohio-postgres.render.com/vexe_db',
-        conn_max_age=600
+        default='postgresql://dtb_vexeapp_user:8UnKZz5EzSHxf2iLOy3ykfYUCmTx8Elp@dpg-d7mpgslckfvc73einq2g-a.ohio-postgres.render.com/dtb_vexeapp',
+        conn_max_age=600,
+        ssl_require=True
     )
 }
 
