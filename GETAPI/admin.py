@@ -65,8 +65,12 @@ class GheNgoiAdmin(admin.ModelAdmin):
 
 @admin.register(Ve)
 class VeAdmin(admin.ModelAdmin):
-    list_display = ('VeID', 'KhachHang', 'ChuyenXe', 'Ghe', 'GiaVe', 'NgayDat', 'TrangThaiThanhToan')
+    list_display = ('VeID', 'KhachHang', 'ChuyenXe', 'get_danh_sach_ghe', 'TongTien', 'NgayDat', 'TrangThaiThanhToan')
     list_filter = ('TrangThaiThanhToan', 'NgayDat')
+
+    def get_danh_sach_ghe(self, obj):
+        return ", ".join([str(g.soGhe) for g in obj.ghe_ngoi_ve.all()])
+    get_danh_sach_ghe.short_description = 'Danh sách ghế'
 
 @admin.register(ThanhToan)
 class ThanhToanAdmin(admin.ModelAdmin):
