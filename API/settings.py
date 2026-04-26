@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure--jmxde=v3@jymq+d#e-*x*bge6_l%_001vt@afttky2qr80(i2')
 
 # Thay đổi dòng DEBUG cũ thành:
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = ['*'] # cần đổi lại sau khi có domain
 
