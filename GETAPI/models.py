@@ -250,6 +250,11 @@ class Ve(models.Model):
         ('Chưa thanh toán', 'Chưa thanh toán'),
         ('Đã thanh toán', 'Đã thanh toán'),
     ]
+    TRANG_THAI_VE_CHOICES = [
+        ('Đã đặt', 'Đã đặt'),
+        ('Đã đi', 'Đã đi'),
+        ('Đã hủy', 'Đã hủy'),
+    ]
     VeID = models.CharField(max_length=10, primary_key=True)
     KhachHang = models.ForeignKey(KhachHang, on_delete=models.CASCADE)
     ChuyenXe = models.ForeignKey(ChuyenXe, on_delete=models.CASCADE)
@@ -262,6 +267,7 @@ class Ve(models.Model):
     TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES,
                                           default='Chưa thanh toán')
     TrangThaiDanhGia = models.CharField(max_length=50, choices=TRANG_THAI_DAN_GIA_CHOICES, default='Không có quyền')
+    TrangThai = models.CharField(max_length=50, choices=TRANG_THAI_VE_CHOICES, default='Đã đặt')
     DiemDon = models.CharField(max_length=500, null=True, blank=True)
     DiemTra = models.CharField(max_length=500, null=True, blank=True)
 

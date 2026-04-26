@@ -4,6 +4,8 @@ from .models import (
     Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, ThanhToan, DanhGia
 )
 from django.db import transaction
+from django.utils import timezone
+from datetime import datetime, date, time
 
 class KhachHangSerializer(serializers.ModelSerializer):
     class Meta:
@@ -116,9 +118,38 @@ class GheNgoiSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class VeSerializer(serializers.ModelSerializer):
+    TenTuyen = serializers.CharField(source='ChuyenXe.TuyenXe.tenTuyen', read_only=True)
+    TenNhaXe = serializers.CharField(source='ChuyenXe.TuyenXe.nhaXe.Tennhaxe', read_only=True)
+    NgayKhoiHanh = serializers.DateField(source='ChuyenXe.NgayKhoiHanh', read_only=True)
+    GioDi = serializers.TimeField(source='ChuyenXe.GioDi', read_only=True)
+    GiaVe = serializers.SerializerMethodField()
+    
+    DanhSachGhe = serializers.SerializerMethodField()
+    SoLuongGhe = serializers.SerializerMethodField()
+    # TrangThaiVe = serializers.SerializerMethodField() # Removed dynamic status calculation
+
     class Meta:
         model = Ve
-        fields = '__all__'
+        fields = [
+            'VeID', 'KhachHang', 'ChuyenXe', 'SoDienThoai', 'TongTien', 
+            'TrangThaiThanhToan', 'TrangThaiDanhGia', 'DiemDon', 'DiemTra', 'NgayDat',
+            'TenTuyen', 'TenNhaXe', 'NgayKhoiHanh', 'GioDi', 
+            'DanhSachGhe', 'SoLuongGhe', 'TrangThai', 'GiaVe' # Replaced TrangThaiVe with TrangThai, Added GiaVe
+        ]
+        
+    def get_GiaVe(self, obj):
+        if obj.ChuyenXe and obj.ChuyenXe.Xe and obj.ChuyenXe.Xe.Loaixe:
+            return obj.ChuyenXe.Xe.Loaixe.GiaVe
+        return None
+
+    def get_DanhSachGhe(self, obj):
+        # Truy vấn tất cả các ghế thuộc về vé này
+        ghes = GheNgoi.objects.filter(Ve=obj)
+        return [ghe.soGhe for ghe in ghes if ghe.soGhe]
+        
+    def get_SoLuongGhe(self, obj):
+        return GheNgoi.objects.filter(Ve=obj).count()
+        
 
 class ThanhToanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -196,6 +227,7 @@ class DatVeSerializer(serializers.Serializer):
                 TongTien=tong_tien,
                 TrangThaiThanhToan="Chưa thanh toán",
                 TrangThaiDanhGia="Không có quyền",
+                TrangThai="Đã đặt", # Thiết lập trạng thái mặc định
                 DiemDon=diem_don,
                 DiemTra=diem_tra
             )

@@ -13,6 +13,27 @@ from .serializers import (
     ThanhToanSerializer, DanhGiaSerializer, DatVeSerializer
 )
 
+class DanhSachVeAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        khach_hang_id = request.query_params.get('khach_hang_id')
+        trang_thai = request.query_params.get('trang_thai')
+
+        if not khach_hang_id:
+            return Response({"error": "Thiếu tham số khach_hang_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Truy vấn vé theo khách hàng
+        queryset = Ve.objects.filter(KhachHang__KhachHangID=khach_hang_id)
+
+        # Nếu có truyền trạng thái thì lọc thêm
+        if trang_thai:
+            queryset = queryset.filter(TrangThai=trang_thai)
+
+        # Sắp xếp vé mới nhất lên đầu
+        queryset = queryset.order_by('-NgayDat')
+
+        serializer = VeSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class DatVeAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = DatVeSerializer(data=request.data)
