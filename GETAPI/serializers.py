@@ -52,7 +52,9 @@ class TuyenXeSerializer(serializers.ModelSerializer):
 
 # Trong serializers.py của project Django
 class ChuyenXeSerializer(serializers.ModelSerializer):
-
+    Xe = serializers.PrimaryKeyRelatedField(queryset=Xe.objects.all())
+    TuyenXe = serializers.PrimaryKeyRelatedField(queryset=TuyenXe.objects.all())
+    Taixe = serializers.PrimaryKeyRelatedField(queryset=Taixe.objects.all(), allow_null=True, required=False)
     TenNhaXe = serializers.CharField(
         source='TuyenXe.nhaXe.Tennhaxe',
         read_only=True
