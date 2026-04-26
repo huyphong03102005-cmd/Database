@@ -87,7 +87,7 @@ class User_Authentication(models.Model):
 # 4. Bảng Tài Xế
 class Taixe(models.Model):
     TaixeID = models.CharField(max_length=10, primary_key=True)
-    HinhAnhURL = models.CharField(max_length=255, null=True, blank=True)
+    HinhAnhURL = models.TextField(null=True, blank=True) # Đổi sang TextField
     SoBangLai = models.CharField(max_length=20, unique=True)
     soCCCD = models.CharField(
         max_length=12,
@@ -129,7 +129,7 @@ class Loaixe(models.Model):
     NgayCapNhatGia = models.DateField(null=True, blank=True)
     SoCho = models.IntegerField(validators=[MinValueValidator(1)])
     SoDoGheNgoiURL = models.CharField(max_length=255, null=True, blank=True)
-    GiaVe = models.DecimalField(max_digits=19, decimal_places=4)  # Thay cho MONEY
+    GiaVe = models.IntegerField() # Đổi sang IntegerField thay cho DecimalField
 
     class Meta:
         verbose_name = 'Loại xe'
