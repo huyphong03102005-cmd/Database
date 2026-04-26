@@ -51,6 +51,7 @@ class Nhaxe(models.Model):
 # 3. Bảng Tài Khoản (User Authentication)
 class User_Authentication(models.Model):
     UserID = models.CharField(max_length=10, primary_key=True)
+    Taixe = models.ForeignKey('Taixe', on_delete=models.SET_NULL, null=True, blank=True, related_name='auth_user')
     KhachHang = models.ForeignKey(KhachHang, on_delete=models.SET_NULL, null=True, blank=True)
     Nhaxe = models.ForeignKey(Nhaxe, on_delete=models.SET_NULL, null=True, blank=True)
     TenDangNhap = models.CharField(max_length=200, unique=True,null=True,blank=True)
