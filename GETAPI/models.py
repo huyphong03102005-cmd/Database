@@ -7,7 +7,7 @@ class KhachHang(models.Model):
     Hovaten = models.CharField(max_length=900, null=True, blank=True)
     Email = models.EmailField(max_length=100, unique=True, null=True, blank=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
-    AnhDaiDienURL = models.ImageField(upload_to='khachhang_avatars/', null=True, blank=True)
+    AnhDaiDienURL = models.TextField(null=True, blank=True)
     Ngaysinh = models.DateField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
