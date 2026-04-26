@@ -10,6 +10,10 @@ class KhachHang(models.Model):
     AnhDaiDienURL = models.TextField(null=True, blank=True)
     Ngaysinh = models.DateField(null=True, blank=True)
 
+    class Meta:
+        verbose_name = 'Khách hàng'
+        verbose_name_plural = 'Danh sách Khách hàng'
+
     def save(self, *args, **kwargs):
         if not self.KhachHangID:
             # Tạo tự động KhachHangID với cú pháp KH00001, KH00002...
@@ -45,6 +49,10 @@ class Nhaxe(models.Model):
         validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
 
+    class Meta:
+        verbose_name = 'Nhà xe'
+        verbose_name_plural = 'Danh sách Nhà xe'
+
     def __str__(self):
         return self.Tennhaxe or self.NhaxeID
 
@@ -62,6 +70,11 @@ class User_Authentication(models.Model):
         unique=True,
         validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
+
+    class Meta:
+        verbose_name = 'Tài khoản User'
+        verbose_name_plural = 'Danh sách Tài khoản User'
+
     def __str__(self):
         return self.TenDangNhap
 
@@ -78,6 +91,10 @@ class Taixe(models.Model):
     LoaiBangLai = models.CharField(max_length=20, null=True, blank=True)
     NgayHetHanBangLai = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        verbose_name = 'Tài xế'
+        verbose_name_plural = 'Danh sách Tài xế'
+
     def __str__(self):
         return self.TaixeID
 
@@ -92,6 +109,8 @@ class CHITIETTAIXE(models.Model):
 
     class Meta:
         unique_together = ('Nhaxe', 'Taixe')
+        verbose_name = 'Chi tiết Tài xế'
+        verbose_name_plural = 'Danh sách Chi tiết Tài xế'
 
 # 6. Bảng Loại Xe
 class Loaixe(models.Model):
@@ -100,6 +119,10 @@ class Loaixe(models.Model):
     SoCho = models.IntegerField(validators=[MinValueValidator(1)])
     SoDoGheNgoiURL = models.CharField(max_length=255, null=True, blank=True)
     GiaVe = models.DecimalField(max_digits=19, decimal_places=4) # Thay cho MONEY
+
+    class Meta:
+        verbose_name = 'Loại xe'
+        verbose_name_plural = 'Danh sách Loại xe'
 
     def __str__(self):
         return self.LoaixeID
@@ -113,6 +136,8 @@ class CHITIETLOAIXE(models.Model):
 
     class Meta:
         unique_together = ('Nhaxe', 'Loaixe')
+        verbose_name = 'Chi tiết Loại xe'
+        verbose_name_plural = 'Danh sách Chi tiết Loại xe'
 
 # 8. Bảng Xe
 class Xe(models.Model):
@@ -122,6 +147,10 @@ class Xe(models.Model):
     TrangThai = models.CharField(max_length=20, null=True, blank=True)
     SoGhe = models.IntegerField(null=True, blank=True)
     BienSoXe = models.CharField(max_length=20, unique=True)
+
+    class Meta:
+        verbose_name = 'Xe'
+        verbose_name_plural = 'Danh sách Xe'
 
     def __str__(self):
         return self.BienSoXe
@@ -143,6 +172,10 @@ class TuyenXe(models.Model):
     TrangThai = models.CharField(max_length=50, choices=TRANG_THAI_CHOICES, default='Đang hoạt động')
     DiemTrungGian = models.CharField(max_length=500, null=True, blank=True)
 
+    class Meta:
+        verbose_name = 'Tuyến xe'
+        verbose_name_plural = 'Danh sách Tuyến xe'
+
     def __str__(self):
         return self.tenTuyen or self.tuyenXeID
 
@@ -156,6 +189,10 @@ class ChuyenXe(models.Model):
     GioDi = models.TimeField(null=True, blank=True)
     GioDen = models.TimeField(null=True, blank=True)
     TrangThai = models.CharField(max_length=10, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Chuyến xe'
+        verbose_name_plural = 'Danh sách Chuyến xe'
 
     def __str__(self):
         return self.ChuyenXeID
@@ -173,6 +210,10 @@ class GheNgoi(models.Model):
     trangThai = models.CharField(max_length=20, choices=TRANG_THAI_GHE_CHOICES, default='Còn trống')
     # Thêm khoá vé cho ghế, theo yêu cầu "gán mã vé vừa tạo vào ghế đó"
     Ve = models.ForeignKey('Ve', on_delete=models.SET_NULL, null=True, blank=True, related_name='ghe_ngoi_ve')
+
+    class Meta:
+        verbose_name = 'Ghế ngồi'
+        verbose_name_plural = 'Danh sách Ghế ngồi'
 
     def __str__(self):
         return f"{self.soGhe} - {self.ChuyenXe.ChuyenXeID}"
@@ -203,6 +244,10 @@ class Ve(models.Model):
     DiemDon = models.CharField(max_length=500, null=True, blank=True)
     DiemTra = models.CharField(max_length=500, null=True, blank=True)
 
+    class Meta:
+        verbose_name = 'Vé'
+        verbose_name_plural = 'Danh sách Vé'
+
     def __str__(self):
         return self.VeID
 
@@ -215,6 +260,10 @@ class ThanhToan(models.Model):
     NgayThanhToan = models.DateTimeField(auto_now_add=True)
     MaGiaoDich = models.CharField(max_length=50, null=True, blank=True)
 
+    class Meta:
+        verbose_name = 'Thanh toán'
+        verbose_name_plural = 'Danh sách Thanh toán'
+
     def __str__(self):
         return self.ThanhToanID
 
@@ -226,5 +275,10 @@ class DanhGia(models.Model):
     Diemso = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     Nhanxet = models.TextField(max_length=500, null=True, blank=True)
     NgayDanhGia = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Đánh giá'
+        verbose_name_plural = 'Danh sách Đánh giá'
+
     def __str__(self):
         return f"Review {self.DanhGiaID} - {self.Diemso}"
