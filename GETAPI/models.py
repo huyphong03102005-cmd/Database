@@ -1,9 +1,12 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 # 1. Bảng Khách Hàng
 class KhachHang(models.Model):
-    KhachHangID = models.CharField(max_length=10, primary_key=True, blank=True) # Để blank=True cho phép tự sinh
+    KhachHangID = models.CharField(max_length=10, primary_key=True, blank=True)  # Để blank=True cho phép tự sinh
     Hovaten = models.CharField(max_length=900, null=True, blank=True)
     Email = models.EmailField(max_length=100, unique=True, null=True, blank=True)
     NgayDangKy = models.DateTimeField(auto_now_add=True)
@@ -23,7 +26,7 @@ class KhachHang(models.Model):
             else:
                 last_id = last_kh.KhachHangID
                 try:
-                    last_num = int(last_id[2:]) # Lấy phần số sau chữ 'KH'
+                    last_num = int(last_id[2:])  # Lấy phần số sau chữ 'KH'
                     new_num = last_num + 1
                     self.KhachHangID = f'KH{new_num:05d}'
                 except ValueError:
@@ -33,6 +36,7 @@ class KhachHang(models.Model):
 
     def __str__(self):
         return str(self.KhachHangID) if self.KhachHangID else "Chưa có ID"
+
 
 # 2. Bảng Nhà Xe:
 class Nhaxe(models.Model):
@@ -56,14 +60,15 @@ class Nhaxe(models.Model):
     def __str__(self):
         return str(self.Tennhaxe) if self.Tennhaxe else str(self.NhaxeID)
 
+
 # 3. Bảng Tài Khoản (User Authentication)
 class User_Authentication(models.Model):
     UserID = models.CharField(max_length=10, primary_key=True)
     Taixe = models.ForeignKey('Taixe', on_delete=models.SET_NULL, null=True, blank=True, related_name='auth_user')
     KhachHang = models.ForeignKey(KhachHang, on_delete=models.SET_NULL, null=True, blank=True)
     Nhaxe = models.ForeignKey(Nhaxe, on_delete=models.SET_NULL, null=True, blank=True)
-    TenDangNhap = models.CharField(max_length=200, unique=True,null=True,blank=True)
-    MatKhau = models.CharField(max_length=200,null=True,blank=True)
+    TenDangNhap = models.CharField(max_length=200, unique=True, null=True, blank=True)
+    MatKhau = models.CharField(max_length=200, null=True, blank=True)
     Vaitro = models.CharField(max_length=20)
     SoDienThoai = models.CharField(
         max_length=12,
@@ -77,6 +82,7 @@ class User_Authentication(models.Model):
 
     def __str__(self):
         return str(self.TenDangNhap) if self.TenDangNhap else str(self.UserID)
+
 
 # 4. Bảng Tài Xế
 class Taixe(models.Model):
@@ -98,6 +104,7 @@ class Taixe(models.Model):
     def __str__(self):
         return str(self.TaixeID)
 
+
 # 5. Bảng Chi Tiết Tài Xế (Trung gian Nhà xe - Tài xế)
 class CHITIETTAIXE(models.Model):
     Nhaxe = models.ForeignKey(Nhaxe, on_delete=models.CASCADE)
@@ -115,13 +122,14 @@ class CHITIETTAIXE(models.Model):
     def __str__(self):
         return f"{self.Nhaxe} - {self.Taixe}"
 
+
 # 6. Bảng Loại Xe
 class Loaixe(models.Model):
     LoaixeID = models.CharField(max_length=10, primary_key=True)
     NgayCapNhatGia = models.DateField(null=True, blank=True)
     SoCho = models.IntegerField(validators=[MinValueValidator(1)])
     SoDoGheNgoiURL = models.CharField(max_length=255, null=True, blank=True)
-    GiaVe = models.DecimalField(max_digits=19, decimal_places=4) # Thay cho MONEY
+    GiaVe = models.DecimalField(max_digits=19, decimal_places=4)  # Thay cho MONEY
 
     class Meta:
         verbose_name = 'Loại xe'
@@ -129,6 +137,7 @@ class Loaixe(models.Model):
 
     def __str__(self):
         return str(self.LoaixeID)
+
 
 # 7. Bảng Chi Tiết Loại Xe (Trung gian Nhà xe - Loại xe)
 class CHITIETLOAIXE(models.Model):
@@ -145,6 +154,7 @@ class CHITIETLOAIXE(models.Model):
     def __str__(self):
         return f"{self.Nhaxe} - {self.Loaixe}"
 
+
 # 8. Bảng Xe
 class Xe(models.Model):
     XeID = models.CharField(max_length=10, primary_key=True)
@@ -160,6 +170,7 @@ class Xe(models.Model):
 
     def __str__(self):
         return str(self.BienSoXe) if self.BienSoXe else str(self.XeID)
+
 
 # 9. Bảng Tuyến Xe:
 class TuyenXe(models.Model):
@@ -185,6 +196,7 @@ class TuyenXe(models.Model):
     def __str__(self):
         return str(self.tenTuyen) if self.tenTuyen else str(self.tuyenXeID)
 
+
 # 10. Bảng Chuyến Xe
 class ChuyenXe(models.Model):
     ChuyenXeID = models.CharField(max_length=10, primary_key=True)
@@ -194,7 +206,8 @@ class ChuyenXe(models.Model):
     NgayKhoiHanh = models.DateField(null=True, blank=True)
     GioDi = models.TimeField(null=True, blank=True)
     GioDen = models.TimeField(null=True, blank=True)
-    TrangThai = models.CharField(max_length=10, null=True, blank=True)
+    # Thiết lập trạng thái mặc định là "Chưa hoàn thành"
+    TrangThai = models.CharField(max_length=50, null=True, blank=True, default='Chưa hoàn thành')
 
     class Meta:
         verbose_name = 'Chuyến xe'
@@ -202,6 +215,7 @@ class ChuyenXe(models.Model):
 
     def __str__(self):
         return str(self.ChuyenXeID)
+
 
 # 11. Bảng Ghế Ngồi
 class GheNgoi(models.Model):
@@ -224,9 +238,10 @@ class GheNgoi(models.Model):
     def __str__(self):
         return f"{self.soGhe} - {self.ChuyenXe.ChuyenXeID}"
 
+
 # 12. Bảng Vé
 class Ve(models.Model):
-    TRANG_THAI_DANH_GIA_CHOICES = [
+    TRANG_THAI_DAN_GIA_CHOICES = [
         ('Không có quyền', 'Không có quyền'),
         ('Chờ đánh giá', 'Chờ đánh giá'),
         ('Đã đánh giá', 'Đã đánh giá'),
@@ -245,8 +260,9 @@ class Ve(models.Model):
     )
     NgayDat = models.DateTimeField(auto_now_add=True)
     GiaVe = models.DecimalField(max_digits=19, decimal_places=4)
-    TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES, default='Chưa thanh toán')
-    TrangThaiDanhGia = models.CharField(max_length=50, choices=TRANG_THAI_DANH_GIA_CHOICES, default='Không có quyền')
+    TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES,
+                                          default='Chưa thanh toán')
+    TrangThaiDanhGia = models.CharField(max_length=50, choices=TRANG_THAI_DAN_GIA_CHOICES, default='Không có quyền')
     DiemDon = models.CharField(max_length=500, null=True, blank=True)
     DiemTra = models.CharField(max_length=500, null=True, blank=True)
 
@@ -256,6 +272,7 @@ class Ve(models.Model):
 
     def __str__(self):
         return str(self.VeID)
+
 
 # 13. Bảng Thanh Toán
 class ThanhToan(models.Model):
@@ -273,6 +290,7 @@ class ThanhToan(models.Model):
     def __str__(self):
         return str(self.ThanhToanID)
 
+
 # 14. Bảng Đánh Giá
 class DanhGia(models.Model):
     DanhGiaID = models.CharField(max_length=10, primary_key=True)
@@ -288,3 +306,46 @@ class DanhGia(models.Model):
 
     def __str__(self):
         return f"Review {self.DanhGiaID} - {self.Diemso}"
+
+
+# ==================== SIGNALS (Tự động tạo ghế) ====================
+@receiver(post_save, sender=ChuyenXe)
+def auto_create_seats(sender, instance, created, **kwargs):
+    if created:  # Chỉ chạy khi tạo chuyến xe MỚI
+        try:
+            # 1. Lấy số chỗ từ Loại Xe (thông qua đối tượng Xe liên kết)
+            if instance.Xe and instance.Xe.Loaixe:
+                num_seats = instance.Xe.Loaixe.SoCho
+
+                # 2. Quy tắc đặt đầu mã ghế
+                prefix = "G"
+                if num_seats == 4:
+                    prefix = "A"
+                elif num_seats == 7:
+                    prefix = "B"
+                elif num_seats == 9:
+                    prefix = "C"
+
+                # 3. Tạo danh sách ghế
+                seats_to_create = []
+                for i in range(1, num_seats + 1):
+                    # Mã ghế: A1, A2... hoặc G01, G02...
+                    ma_ghe = f"{prefix}{i}" if num_seats < 10 else f"{prefix}{i:02d}"
+                    # gheID = CX00001A1
+                    ghe_id = f"{instance.ChuyenXeID}{ma_ghe}"
+
+                    seats_to_create.append(GheNgoi(
+                        gheID=ghe_id,
+                        ChuyenXe=instance,
+                        soGhe=ma_ghe,
+                        trangThai="Còn trống"
+                    ))
+
+                # 4. Lưu hàng loạt vào DB
+                GheNgoi.objects.bulk_create(seats_to_create)
+                print(f"==> Đã tự động tạo {num_seats} ghế cho chuyến {instance.ChuyenXeID}")
+            else:
+                print(f"==> Không tìm thấy thông tin Xe/LoaiXe để tạo ghế cho chuyến {instance.ChuyenXeID}")
+
+        except Exception as e:
+            print(f"==> Lỗi tự tạo ghế: {e}")
