@@ -139,11 +139,14 @@ class DatVeSerializer(serializers.Serializer):
     tong_tien = serializers.DecimalField(max_digits=19, decimal_places=4)
 
     def validate(self, attrs):
+        # 1. Kiểm tra chuyến xe
         try:
             chuyen_xe = ChuyenXe.objects.get(ChuyenXeID=attrs['chuyen_xe'])
             attrs['chuyen_xe_obj'] = chuyen_xe
         except ChuyenXe.DoesNotExist:
             raise serializers.ValidationError("Chuyến xe không tồn tại.")
+        
+        # 2. Kiểm tra khách hàng
         try:
             user_auth = User_Authentication.objects.get(SoDienThoai=attrs['khach_hang'])
             if not user_auth.KhachHang:
@@ -152,8 +155,66 @@ class DatVeSerializer(serializers.Serializer):
             attrs['so_dien_thoai'] = user_auth.SoDienThoai
         except User_Authentication.DoesNotExist:
             raise serializers.ValidationError("Không tìm thấy khách hàng với số điện thoại này.")
+            
+        # 3. Kiểm tra ghế có tồn tại và còn trống hay không
+        danh_sach_ghe = attrs['danh_sach_ghe']
+        ghe_objs = []
+        for so_ghe in danh_sach_ghe:
+            try:
+                ghe = GheNgoi.objects.get(ChuyenXe=chuyen_xe, soGhe=so_ghe)
+                if ghe.trangThai == 'Đã đặt':
+                    raise serializers.ValidationError(f"Ghế {so_ghe} đã có người đặt.")
+                ghe_objs.append(ghe)
+            except GheNgoi.DoesNotExist:
+                raise serializers.ValidationError(f"Ghế {so_ghe} không tồn tại trên chuyến xe này.")
+        
+        attrs['ghe_objs'] = ghe_objs
         return attrs
 
     def create(self, validated_data):
-        # ... (Logic create giữ nguyên như cũ) ...
-        return []
+        chuyen_xe = validated_data['chuyen_xe_obj']
+        khach_hang = validated_data['khach_hang_obj']
+        ghe_objs = validated_data['ghe_objs']
+        diem_don = validated_data.get('diem_don', '')
+        diem_tra = validated_data.get('diem_tra', '')
+        tong_tien = validated_data['tong_tien']
+        so_dien_thoai = validated_data['so_dien_thoai']
+        
+        with transaction.atomic():
+            # 1. Tạo VeID duy nhất: VE00001, VE00002...
+            last_ve = Ve.objects.all().order_by('VeID').last()
+            if not last_ve:
+                ve_id = 'VE00001'
+            else:
+                last_id = last_ve.VeID
+                try:
+                    last_num = int(last_id[2:]) # Cắt bỏ chữ VE
+                    ve_id = f"VE{last_num + 1:05d}"
+                except ValueError:
+                    ve_id = f"VE{Ve.objects.count() + 1:05d}"
+                    
+            # Kiểm tra tránh trùng lặp do concurrency (mặc dù hiếm khi dùng transaction level này)
+            while Ve.objects.filter(VeID=ve_id).exists():
+                last_num += 1
+                ve_id = f"VE{last_num:05d}"
+
+            # 2. Tạo một đối tượng Vé duy nhất
+            ve = Ve.objects.create(
+                VeID=ve_id,
+                KhachHang=khach_hang,
+                ChuyenXe=chuyen_xe,
+                SoDienThoai=so_dien_thoai,
+                TongTien=tong_tien,
+                TrangThaiThanhToan="Chưa thanh toán",
+                TrangThaiDanhGia="Không có quyền",
+                DiemDon=diem_don,
+                DiemTra=diem_tra
+            )
+            
+            # 3. Cập nhật tất cả các ghế (GheNgoi) đã chọn: đổi trạng thái và liên kết tới Vé vừa tạo
+            for ghe in ghe_objs:
+                ghe.trangThai = 'Đã đặt'
+                ghe.Ve = ve
+                ghe.save()
+                
+        return ve

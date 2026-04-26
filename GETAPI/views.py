@@ -19,10 +19,10 @@ class DatVeAPIView(APIView):
         if serializer.is_valid():
             try:
                 # Tạo vé thông qua hàm create trong Serializer
-                danh_sach_ve = serializer.save()
+                ve = serializer.save()
                 
                 # Format kết quả
-                ve_serializer = VeSerializer(danh_sach_ve, many=True)
+                ve_serializer = VeSerializer(ve)
                 return Response({
                     "message": "Đặt vé thành công.",
                     "data": ve_serializer.data
