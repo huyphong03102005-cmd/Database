@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
+from datetime import timedelta
 
 
 # 1. Bảng Khách Hàng
@@ -52,6 +54,14 @@ class Nhaxe(models.Model):
         unique=True,
         validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
+    rating_count = models.IntegerField(default=0)
+    rating_sum = models.IntegerField(default=0)
+
+    @property
+    def rating_avg(self):
+        if self.rating_count == 0:
+            return 0
+        return round(self.rating_sum / self.rating_count, 1)
 
     class Meta:
         verbose_name = 'Nhà xe'
@@ -263,6 +273,7 @@ class Ve(models.Model):
         validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
     NgayDat = models.DateTimeField(auto_now_add=True)
+    NgayKetThuc = models.DateTimeField(null=True, blank=True)
     TongTien = models.DecimalField(max_digits=19, decimal_places=4)
     TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES,
                                           default='Chưa thanh toán')
@@ -278,6 +289,23 @@ class Ve(models.Model):
     def __str__(self):
         return str(self.VeID)
 
+@receiver(post_save, sender=Ve)
+def handle_trang_thai_danh_gia(sender, instance, **kwargs):
+    # 1. Nếu vé vừa hoàn thành (Đã đi) -> Cho phép đánh giá nếu còn hạn
+    if instance.TrangThai == 'Đã đi' and instance.TrangThaiDanhGia == 'Không có quyền':
+        # Kiểm tra nếu chưa quá 7 ngày kể từ lúc kết thúc
+        is_expired = False
+        if instance.NgayKetThuc:
+            if (timezone.now() - instance.NgayKetThuc).days >= 7:
+                is_expired = True
+        
+        if not is_expired:
+            Ve.objects.filter(pk=instance.pk).update(TrangThaiDanhGia='Chờ đánh giá')
+
+    # 2. Nếu đang 'Chờ đánh giá' mà đã quá 7 ngày -> Ẩn (Không có quyền)
+    if instance.TrangThaiDanhGia == 'Chờ đánh giá' and instance.NgayKetThuc:
+        if (timezone.now() - instance.NgayKetThuc).days >= 7:
+            Ve.objects.filter(pk=instance.pk).update(TrangThaiDanhGia='Không có quyền')
 
 # 13. Bảng Thanh Toán
 class ThanhToan(models.Model):
@@ -304,6 +332,7 @@ class DanhGia(models.Model):
     Diemso = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     Nhanxet = models.TextField(max_length=500, null=True, blank=True)
     NgayDanhGia = models.DateTimeField(auto_now_add=True)
+    Nhaxe = models.ForeignKey(Nhaxe, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Đánh giá'
@@ -312,6 +341,20 @@ class DanhGia(models.Model):
     def __str__(self):
         return f"Review {self.DanhGiaID} - {self.Diemso}"
 
+@receiver(post_save, sender=DanhGia)
+def update_rating_nhaxe(sender, instance, created, **kwargs):
+    if created:
+        nhaxe = instance.Ve.ChuyenXe.TuyenXe.nhaXe
+
+        # Cộng điểm
+        nhaxe.rating_count += 1
+        nhaxe.rating_sum += instance.Diemso
+        nhaxe.save()
+
+        # Cập nhật trạng thái vé (KHÔNG dùng save để tránh loop)
+        Ve.objects.filter(pk=instance.Ve.pk).update(
+            TrangThaiDanhGia='Đã đánh giá'
+        )
 
 # ==================== SIGNALS (Tự động tạo ghế) ====================
 @receiver(post_save, sender=ChuyenXe)
