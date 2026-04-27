@@ -5,7 +5,7 @@ from .views import (
     TaixeViewSet, ChiTietTaiXeViewSet, LoaixeViewSet, 
     ChiTietLoaiXeViewSet, XeViewSet, TuyenXeViewSet, 
     ChuyenXeViewSet, GheNgoiViewSet, VeViewSet, 
-    ThanhToanViewSet, DanhGiaViewSet, DatVeAPIView, DanhSachVeAPIView
+    ThanhToanViewSet, DanhGiaViewSet, DatVeAPIView, DanhSachVeAPIView, HuyVeAPIView
 )
 
 router = DefaultRouter()
@@ -27,5 +27,6 @@ router.register(r'danhgia', DanhGiaViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('dat-ve/', DatVeAPIView.as_view(), name='dat_ve_api'),
+    path('huy-ve/', HuyVeAPIView.as_view(), name='huy_ve_api'),
     path('ve/danh-sach/', DanhSachVeAPIView.as_view(), name='danh_sach_ve_api'),
 ]

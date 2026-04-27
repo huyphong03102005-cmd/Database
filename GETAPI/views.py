@@ -3,13 +3,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import (
     KhachHang, Nhaxe, User_Authentication, Taixe, CHITIETTAIXE, 
-    Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, ThanhToan, DanhGia
+    Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, VeHuy, ThanhToan, DanhGia
 )
 from .serializers import (
     KhachHangSerializer, NhaxeSerializer, UserAuthenticationSerializer, 
     TaixeSerializer, ChiTietTaiXeSerializer, LoaixeSerializer, 
     ChiTietLoaiXeSerializer, XeSerializer, TuyenXeSerializer, 
-    ChuyenXeSerializer, GheNgoiSerializer, VeSerializer, 
+    ChuyenXeSerializer, GheNgoiSerializer, VeSerializer, VeHuySerializer, HuyVeSerializer,
     ThanhToanSerializer, DanhGiaSerializer, DatVeSerializer
 )
 
@@ -21,7 +21,13 @@ class DanhSachVeAPIView(APIView):
         if not khach_hang_id:
             return Response({"error": "Thiếu tham số khach_hang_id"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Truy vấn vé theo khách hàng
+        # Nếu lọc vé đã hủy, truy vấn từ bảng VeHuy
+        if trang_thai == 'Đã hủy':
+            queryset = VeHuy.objects.filter(KhachHang__KhachHangID=khach_hang_id).order_by('-ThoiGianHuy')
+            serializer = VeHuySerializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # Truy vấn vé theo khách hàng từ bảng Ve
         queryset = Ve.objects.filter(KhachHang__KhachHangID=khach_hang_id)
 
         # Nếu có truyền trạng thái thì lọc thêm
@@ -54,6 +60,17 @@ class DatVeAPIView(APIView):
                     "error": str(e)
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class HuyVeAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = HuyVeSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                result = serializer.save()
+                return Response(result, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class KhachHangViewSet(viewsets.ModelViewSet):

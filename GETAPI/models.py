@@ -221,7 +221,6 @@ class ChuyenXe(models.Model):
 class GheNgoi(models.Model):
     TRANG_THAI_GHE_CHOICES = [
         ('Còn trống', 'Còn trống'),
-        ('Đang chọn', 'Đang chọn'),
         ('Đã đặt', 'Đã đặt'),
     ]
     gheID = models.CharField(max_length=10, primary_key=True)
@@ -278,6 +277,44 @@ class Ve(models.Model):
     def __str__(self):
         return str(self.VeID)
 
+# 12.1. Bảng Vé Hủy
+class VeHuy(models.Model):
+    TRANG_THAI_DAN_GIA_CHOICES = [
+        ('Không có quyền', 'Không có quyền'),
+        ('Chờ đánh giá', 'Chờ đánh giá'),
+        ('Đã đánh giá', 'Đã đánh giá'),
+    ]
+    TRANG_THAI_THANH_TOAN_CHOICES = [
+        ('Chưa thanh toán', 'Chưa thanh toán'),
+        ('Đã thanh toán', 'Đã thanh toán'),
+        ('Đã hoàn tiền', 'Đã hoàn tiền'),
+    ]
+    TRANG_THAI_VE_CHOICES = [
+        ('Đã hủy', 'Đã hủy'),
+    ]
+    VeHuyID = models.CharField(max_length=10, primary_key=True)
+    KhachHang = models.ForeignKey(KhachHang, on_delete=models.SET_NULL, null=True, blank=True)
+    ChuyenXe = models.ForeignKey(ChuyenXe, on_delete=models.SET_NULL, null=True, blank=True)
+    SoDienThoai = models.CharField(max_length=12, null=True, blank=True)
+    NgayDat = models.DateTimeField(null=True, blank=True)
+    TongTien = models.DecimalField(max_digits=19, decimal_places=4, null=True, blank=True)
+    TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES, default='Chưa thanh toán')
+    TrangThaiDanhGia = models.CharField(max_length=50, choices=TRANG_THAI_DAN_GIA_CHOICES, default='Không có quyền')
+    TrangThai = models.CharField(max_length=50, choices=TRANG_THAI_VE_CHOICES, default='Đã hủy')
+    DiemDon = models.CharField(max_length=500, null=True, blank=True)
+    DiemTra = models.CharField(max_length=500, null=True, blank=True)
+    
+    # Trường mới cho vé hủy
+    ThoiGianHuy = models.DateTimeField(auto_now_add=True)
+    DanhSachGhe = models.CharField(max_length=500, null=True, blank=True)
+    SoLuongGhe = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Vé hủy'
+        verbose_name_plural = 'Danh sách Vé hủy'
+
+    def __str__(self):
+        return str(self.VeHuyID)
 
 # 13. Bảng Thanh Toán
 class ThanhToan(models.Model):

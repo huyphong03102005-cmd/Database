@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     KhachHang, Nhaxe, User_Authentication, Taixe, CHITIETTAIXE, 
-    Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, ThanhToan, DanhGia
+    Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, VeHuy, ThanhToan, DanhGia
 )
 from django.db import transaction
 from django.utils import timezone
@@ -149,7 +149,11 @@ class VeSerializer(serializers.ModelSerializer):
         
     def get_SoLuongGhe(self, obj):
         return GheNgoi.objects.filter(Ve=obj).count()
-        
+
+class VeHuySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VeHuy
+        fields = '__all__'
 
 class ThanhToanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -239,3 +243,50 @@ class DatVeSerializer(serializers.Serializer):
                 ghe.save()
                 
         return ve
+
+class HuyVeSerializer(serializers.Serializer):
+    ve_id = serializers.CharField(max_length=10)
+
+    def validate_ve_id(self, value):
+        try:
+            ve = Ve.objects.get(VeID=value)
+            return ve
+        except Ve.DoesNotExist:
+            raise serializers.ValidationError("Không tìm thấy vé với ID này.")
+
+    def save(self):
+        ve = self.validated_data['ve_id']
+        
+        with transaction.atomic():
+            # 1. Lấy thông tin ghế để lưu vào VeHuy
+            ghes = GheNgoi.objects.filter(Ve=ve)
+            danh_sach_ghe = ", ".join([ghe.soGhe for ghe in ghes if ghe.soGhe])
+            so_luong_ghe = ghes.count()
+            
+            # 2. Tạo bản ghi trong VeHuy
+            VeHuy.objects.create(
+                VeHuyID=ve.VeID,
+                KhachHang=ve.KhachHang,
+                ChuyenXe=ve.ChuyenXe,
+                SoDienThoai=ve.SoDienThoai,
+                NgayDat=ve.NgayDat,
+                TongTien=ve.TongTien,
+                TrangThaiThanhToan=ve.TrangThaiThanhToan,
+                TrangThaiDanhGia=ve.TrangThaiDanhGia,
+                TrangThai="Đã hủy",
+                DiemDon=ve.DiemDon,
+                DiemTra=ve.DiemTra,
+                DanhSachGhe=danh_sach_ghe,
+                SoLuongGhe=so_luong_ghe
+            )
+            
+            # 3. Giải phóng ghế
+            for ghe in ghes:
+                ghe.trangThai = 'Còn trống'
+                ghe.Ve = None
+                ghe.save()
+                
+            # 4. Xóa vé cũ
+            ve.delete()
+            
+        return {"message": "Hủy vé thành công"}
