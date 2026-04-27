@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     KhachHang, Nhaxe, User_Authentication, Taixe, CHITIETTAIXE, 
-    Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, 
+    Loaixe, CHITIETLOAIXE, Xe, TuyenXe, ChuyenXe, GheNgoi, Ve, VeHuy,
     ThanhToan, DanhGia
 )
 
@@ -65,12 +65,18 @@ class GheNgoiAdmin(admin.ModelAdmin):
 
 @admin.register(Ve)
 class VeAdmin(admin.ModelAdmin):
-    list_display = ('VeID', 'KhachHang', 'ChuyenXe', 'get_danh_sach_ghe', 'TongTien', 'NgayDat', 'TrangThaiThanhToan')
-    list_filter = ('TrangThaiThanhToan', 'NgayDat')
+    list_display = ('VeID', 'KhachHang', 'ChuyenXe', 'get_danh_sach_ghe', 'TongTien', 'NgayDat', 'TrangThaiThanhToan', 'TrangThai')
+    list_filter = ('TrangThaiThanhToan', 'TrangThai', 'NgayDat')
 
     def get_danh_sach_ghe(self, obj):
         return ", ".join([str(g.soGhe) for g in obj.ghe_ngoi_ve.all()])
     get_danh_sach_ghe.short_description = 'Danh sách ghế'
+
+@admin.register(VeHuy)
+class VeHuyAdmin(admin.ModelAdmin):
+    list_display = ('VeHuyID', 'KhachHang', 'ChuyenXe', 'DanhSachGhe', 'SoLuongGhe', 'TongTien', 'ThoiGianHuy', 'TrangThai')
+    list_filter = ('TrangThai', 'ThoiGianHuy')
+    search_fields = ('VeHuyID', 'SoDienThoai')
 
 @admin.register(ThanhToan)
 class ThanhToanAdmin(admin.ModelAdmin):
