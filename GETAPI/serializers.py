@@ -245,7 +245,7 @@ class DatVeSerializer(serializers.Serializer):
         return ve
 
 class HuyVeSerializer(serializers.Serializer):
-    ve_id = serializers.CharField(max_length=10)
+    ve_id = serializers.CharField(max_length=50)
 
     def validate_ve_id(self, value):
         try:
@@ -256,16 +256,22 @@ class HuyVeSerializer(serializers.Serializer):
 
     def save(self):
         ve = self.validated_data['ve_id']
-        
         with transaction.atomic():
-            # 1. Lấy thông tin ghế để lưu vào VeHuy
-            ghes = GheNgoi.objects.filter(Ve=ve)
-            danh_sach_ghe = ", ".join([ghe.soGhe for ghe in ghes if ghe.soGhe])
-            so_luong_ghe = ghes.count()
+            # 1. Tách Ghế và Chuyến để sinh ID hủy rút gọn
+            seat_part = ve.VeID.split("CX")[0] if "CX" in ve.VeID else "G"
+            trip_num = "".join(filter(str.isdigit, ve.ChuyenXe.ChuyenXeID))[-4:] # Lấy 4 số cuối
+            prefix = f"H{seat_part}{trip_num}"
             
-            # 2. Tạo bản ghi trong VeHuy
+            # Đếm số lần hủy để tránh trùng ID trong bảng VeHuy
+            cancel_count = VeHuy.objects.filter(VeHuyID__startswith=prefix).count()
+            new_id = f"{prefix}{cancel_count + 1}"[:10] # Đảm bảo max 10 ký tự
+
+            # 2. Tạo bản ghi VeHuy (Lưu chuỗi ghế comma-separated)
+            ghes = GheNgoi.objects.filter(Ve=ve)
+            danh_sach_ghe_str = ", ".join([g.soGhe for g in ghes if g.soGhe])
+            
             VeHuy.objects.create(
-                VeHuyID=ve.VeID,
+                VeHuyID=new_id,
                 KhachHang=ve.KhachHang,
                 ChuyenXe=ve.ChuyenXe,
                 SoDienThoai=ve.SoDienThoai,
@@ -276,17 +282,13 @@ class HuyVeSerializer(serializers.Serializer):
                 TrangThai="Đã hủy",
                 DiemDon=ve.DiemDon,
                 DiemTra=ve.DiemTra,
-                DanhSachGhe=danh_sach_ghe,
-                SoLuongGhe=so_luong_ghe
+                DanhSachGhe=danh_sach_ghe_str,
+                SoLuongGhe=ghes.count()
             )
-            
-            # 3. Giải phóng ghế
-            for ghe in ghes:
-                ghe.trangThai = 'Còn trống'
-                ghe.Ve = None
-                ghe.save()
-                
-            # 4. Xóa vé cũ
+
+            # 3. Giải phóng ghế trong bảng ghengoi
+            ghes.update(trangThai='Còn trống', Ve=None)
+
+            # 4. Xóa vé cũ để giải phóng ID Ghế+Chuyến
             ve.delete()
-            
-        return {"message": "Hủy vé thành công"}
+        return {"message": "Success"}
