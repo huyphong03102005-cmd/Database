@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    KhachHangViewSet, NhaxeViewSet, UserAuthenticationViewSet, 
-    TaixeViewSet, ChiTietTaiXeViewSet, LoaixeViewSet, 
-    ChiTietLoaiXeViewSet, XeViewSet, TuyenXeViewSet, 
-    ChuyenXeViewSet, GheNgoiViewSet, VeViewSet, 
-    ThanhToanViewSet, DanhGiaViewSet, DatVeAPIView, DanhSachVeAPIView, HuyVeAPIView
+    KhachHangViewSet, NhaxeViewSet, UserAuthenticationViewSet,
+    TaixeViewSet, ChiTietTaiXeViewSet, LoaixeViewSet,
+    ChiTietLoaiXeViewSet, XeViewSet, TuyenXeViewSet,
+    ChuyenXeViewSet, GheNgoiViewSet, VeViewSet,
+    ThanhToanViewSet, DanhGiaViewSet, DatVeAPIView, DanhSachVeAPIView, HuyVeAPIView, VeHuyViewSet
 )
 
 router = DefaultRouter()
@@ -21,6 +21,7 @@ router.register(r'tuyenxe', TuyenXeViewSet)
 router.register(r'chuyenxe', ChuyenXeViewSet)
 router.register(r'ghengoi', GheNgoiViewSet)
 router.register(r've', VeViewSet)
+router.register(r'vehuy', VeHuyViewSet)
 router.register(r'thanhtoan', ThanhToanViewSet)
 router.register(r'danhgia', DanhGiaViewSet)
 

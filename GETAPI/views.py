@@ -128,3 +128,7 @@ class ThanhToanViewSet(viewsets.ModelViewSet):
 class DanhGiaViewSet(viewsets.ModelViewSet):
     queryset = DanhGia.objects.all()
     serializer_class = DanhGiaSerializer
+
+class VeHuyViewSet(viewsets.ModelViewSet):
+    queryset = VeHuy.objects.all()
+    serializer_class = VeHuySerializer
