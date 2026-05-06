@@ -266,14 +266,15 @@ class Ve(models.Model):
         max_length=12,
         validators=[RegexValidator(regex=r'^0\d{9,}$', message="Số điện thoại phải bắt đầu bằng 0 và có ít nhất 10 số")]
     )
+    HoTen = models.CharField(max_length=200, null=True, blank=True, db_column='Hoten')
+    DiemDon = models.CharField(max_length=500, null=True, blank=True, db_column='DiemDon')
+    DiemTra = models.CharField(max_length=500, null=True, blank=True, db_column='DiemTra')
     NgayDat = models.DateTimeField(auto_now_add=True)
     TongTien = models.DecimalField(max_digits=19, decimal_places=4)
     TrangThaiThanhToan = models.CharField(max_length=20, choices=TRANG_THAI_THANH_TOAN_CHOICES,
                                           default='Chưa thanh toán')
     TrangThaiDanhGia = models.CharField(max_length=50, choices=TRANG_THAI_DAN_GIA_CHOICES, default='Không có quyền')
     TrangThai = models.CharField(max_length=50, choices=TRANG_THAI_VE_CHOICES, default='Đã đặt')
-    DiemDon = models.CharField(max_length=500, null=True, blank=True)
-    DiemTra = models.CharField(max_length=500, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Vé'
@@ -371,7 +372,7 @@ class DanhGia(models.Model):
         verbose_name_plural = 'Danh sách Đánh giá'
 
     def __str__(self):
-        return f"Review {self.DanhGiaID} - {self.Diemso}"
+        return f"Review {self.DanhGiaID} - {self.Diemso} sao"
 
 @receiver(post_save, sender=DanhGia)
 def update_rating_nhaxe(sender, instance, created, **kwargs):
