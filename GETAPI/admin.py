@@ -55,8 +55,16 @@ class TuyenXeAdmin(admin.ModelAdmin):
 
 @admin.register(ChuyenXe)
 class ChuyenXeAdmin(admin.ModelAdmin):
-    list_display = ('ChuyenXeID', 'TuyenXe', 'Xe', 'NgayKhoiHanh', 'GioDi', 'TrangThai')
+    list_display = ('ChuyenXeID', 'get_nha_xe_id', 'TuyenXe', 'Xe', 'NgayKhoiHanh', 'GioDi', 'TrangThai')
     list_filter = ('TrangThai', 'NgayKhoiHanh')
+    
+    def get_nha_xe_id(self, obj):
+        # Truy xuất qua khóa ngoại TuyenXe để lấy mã nhà xe
+        if obj.TuyenXe and obj.TuyenXe.nhaXe:
+            return obj.TuyenXe.nhaXe.NhaxeID
+        return None
+    
+    get_nha_xe_id.short_description = 'Mã Nhà Xe'
 
 @admin.register(GheNgoi)
 class GheNgoiAdmin(admin.ModelAdmin):
